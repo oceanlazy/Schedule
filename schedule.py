@@ -21,7 +21,7 @@ class Schedule(QWidget):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.event_second_passed)
         self.sound_timer = QSound('reveille.wav', self)
-        self.session_duration = 45
+        self.session_duration = 1
 
         default_session = {'countdown': datetime(1, 1, 1, 0, self.session_duration, 0),
                            'prev_action': '',
@@ -48,11 +48,12 @@ class Schedule(QWidget):
         except FileNotFoundError:
             self.session = default_session
 
+        if self.session['countdown'].minute != self.session_duration:
+            self.session['button_pause_continue'] = 'Continue'
+            self.button_pause_continue.show()
+
         self.set_display()
         self.add_bg()
-
-        if self.session['countdown'].minute != self.session_duration:
-            self.start(self.session['action'], True)
 
     def set_display(self):
         self.ui_header.setText(self.session['header'])
