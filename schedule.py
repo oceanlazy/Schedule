@@ -1,4 +1,5 @@
 import sys
+from math import gcd
 from datetime import timedelta, datetime
 import pickle
 
@@ -21,7 +22,7 @@ class Schedule(QWidget):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.event_second_passed)
         self.sound_timer = QSound('reveille.wav', self)
-        self.session_duration = 1
+        self.session_duration = 45
 
         default_session = {'countdown': datetime(1, 1, 1, 0, self.session_duration, 0),
                            'prev_action': '',
@@ -85,18 +86,22 @@ class Schedule(QWidget):
             self.session['current_work'] = datetime(1, 1, 1, 0, 0, 0)
         self.set_display()
 
-    def get_ratio(self, action):
+    def get_seconds(self, action):
         seconds = self.session['today_{}'.format(action)].hour * 3600 + \
                      self.session['today_{}'.format(action)].minute * 60 + \
                      self.session['today_{}'.format(action)].second
         return round((seconds + (seconds / 2700 * 900)) / 3600)  # plus 15 min
+
+    def get_ratio(self):
+        divisor = gcd(self.get_seconds('work'), self.get_seconds('relax'))
+        return int(self.get_seconds('work')/divisor), int(self.get_seconds('relax')/divisor)
 
     def event_second_passed(self):
         self.session['countdown'] -= timedelta(seconds=1)
         time_elapsed = self.session['countdown'].minute * 60 + self.session['countdown'].second
         self.session['progress'] = (self.session_duration * 60 - time_elapsed) / (self.session_duration * 60) * 100
         self.event_action()
-        self.session['current_ratio'] = '{}:{}'.format(self.get_ratio('work'), self.get_ratio('relax'))
+        self.session['current_ratio'] = '{}:{}'.format(*self.get_ratio())
         self.session['title'] = 'Schedule - {}'.format(self.session['countdown'].strftime('%H:%M:%S'))
         if not self.session['countdown'].hour \
                 and not self.session['countdown'].minute \
