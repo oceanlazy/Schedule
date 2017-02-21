@@ -94,7 +94,11 @@ class Schedule(QWidget):
 
     def get_ratio(self):
         divisor = gcd(self.get_seconds('work'), self.get_seconds('relax'))
-        return int(self.get_seconds('work')/divisor), int(self.get_seconds('relax')/divisor)
+        if not divisor:
+            divisor = 1
+        work_ratio = int(self.get_seconds('work')/divisor)
+        relax_ratio = int(self.get_seconds('relax')/divisor)
+        return work_ratio, relax_ratio
 
     def event_second_passed(self):
         self.session['countdown'] -= timedelta(seconds=1)
