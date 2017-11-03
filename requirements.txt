@@ -1,0 +1,8 @@
+altgraph==0.14
+future==0.16.0
+macholib==1.8
+pefile==2017.9.3
+PyInstaller==3.3
+pypiwin32==219
+PyQt5==5.9.1
+sip==4.19.4

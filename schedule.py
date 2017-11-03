@@ -1,19 +1,19 @@
 import sys
+import pickle
 from math import gcd
 from datetime import timedelta, datetime
-import pickle
 
-from PyQt5.QtWidgets import QApplication, QWidget, QDesktopWidget
-from PyQt5.QtGui import QPalette, QBrush, QPixmap
-from PyQt5.uic import loadUi
 from PyQt5 import QtCore
+from PyQt5.uic import loadUi
 from PyQt5.QtMultimedia import QSound
+from PyQt5.QtGui import QPalette, QBrush, QPixmap
+from PyQt5.QtWidgets import QApplication, QWidget, QDesktopWidget
 
 
 class Schedule(QWidget):
     def __init__(self, *args):
         super().__init__(*args)
-        loadUi('form.ui', self)
+        loadUi('ui.ui', self)
         self.move(QDesktopWidget().availableGeometry().center() - self.frameGeometry().center())
         self.button_relax.clicked.connect(lambda action: self.start('relax'))
         self.button_work.clicked.connect(lambda action: self.start('work'))
@@ -21,10 +21,9 @@ class Schedule(QWidget):
         self.button_pause_continue.hide()
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.event_second_passed)
-        self.sound_timer = QSound('reveille.wav', self)
+        self.sound_timer = QSound('alarm.wav', self)
         self.session_duration = 45
-
-        default_session = {'countdown': datetime(1, 1, 1, 0, self.session_duration, 0),
+        default_session = {'countdown': datetime(1970, 1, 1, 0, self.session_duration, 0),
                            'prev_action': '',
                            'action': '',
                            'header': 'Ready',
@@ -33,10 +32,10 @@ class Schedule(QWidget):
                            'button_pause_continue': 'Pause',
                            'title': 'Schedule',
                            'day': datetime.now().day,
-                           'current_work': datetime(1, 1, 1, 0, 0, 0),
-                           'current_relax': datetime(1, 1, 1, 0, 0, 0),
-                           'today_work': datetime(1, 1, 1, 0, 0, 0),
-                           'today_relax': datetime(1, 1, 1, 0, 0, 0),
+                           'current_work': datetime(1970, 1, 1, 0, 0, 0),
+                           'current_relax': datetime(1970, 1, 1, 0, 0, 0),
+                           'today_work': datetime(1970, 1, 1, 0, 0, 0),
+                           'today_relax': datetime(1970, 1, 1, 0, 0, 0),
                            }
 
         try:
@@ -87,25 +86,26 @@ class Schedule(QWidget):
         self.set_display()
 
     def get_seconds(self, action):
-        seconds = self.session['today_{}'.format(action)].hour * 3600 + \
-                     self.session['today_{}'.format(action)].minute * 60 + \
-                     self.session['today_{}'.format(action)].second
-        return round((seconds + (seconds / 2700 * 900)) / 3600)  # plus 15 min
+        dt = self.session['today_{}'.format(action)]
+        epoch = datetime.utcfromtimestamp(0)
+        delta = dt - epoch
+        return int(delta.total_seconds())
 
     def get_ratio(self):
-        divisor = gcd(self.get_seconds('work'), self.get_seconds('relax'))
-        if not divisor:
-            divisor = 1
-        work_ratio = int(self.get_seconds('work')/divisor)
-        relax_ratio = int(self.get_seconds('relax')/divisor)
-        return work_ratio, relax_ratio
+        seconds_work = self.get_seconds('work')
+        seconds_relax = self.get_seconds('relax')
+        divisor = gcd(seconds_work, seconds_relax)
+        ratio_work = int(seconds_work / divisor)
+        ratio_relax = int(seconds_relax / divisor)
+        return ratio_work, ratio_relax
 
     def event_second_passed(self):
         self.session['countdown'] -= timedelta(seconds=1)
         time_elapsed = self.session['countdown'].minute * 60 + self.session['countdown'].second
         self.session['progress'] = (self.session_duration * 60 - time_elapsed) / (self.session_duration * 60) * 100
         self.event_action()
-        self.session['current_ratio'] = '{}:{}'.format(*self.get_ratio())
+        ratio = self.get_ratio()
+        self.session['current_ratio'] = '{}:{}'.format(*ratio)
         self.session['title'] = 'Schedule - {}'.format(self.session['countdown'].strftime('%H:%M:%S'))
         if not self.session['countdown'].hour \
                 and not self.session['countdown'].minute \
@@ -121,7 +121,7 @@ class Schedule(QWidget):
             self.sound_timer.play()
             self.button_pause_continue.clicked.disconnect(self.pause_continue)
             self.button_pause_continue.clicked.connect(self.stop_sound)
-            self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+            self.setWindowState(self.windowState() and ~QtCore.Qt.WindowMinimized or QtCore.Qt.WindowActive)
 
         self.set_display()
 
@@ -157,6 +157,7 @@ class Schedule(QWidget):
             self.session['button_pause_continue'] = 'Pause'
             self.timer.start(1000)
         self.set_display()
+
 
 app = QApplication(sys.argv)
 widget = Schedule()
