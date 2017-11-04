@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['O:\\MyDocuments\\PyCharmProjects\\Schedule\\schedule.py'],
+a = Analysis(['schedule.py'],
              pathex=['O:\\MyDocuments\\PyCharmProjects\\Schedule'],
              binaries=[],
              datas=[],
@@ -26,4 +26,4 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=False , icon='sun.ico')
+          console=True )

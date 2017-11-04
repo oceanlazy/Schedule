@@ -381,6 +381,23 @@ background-image: url(bg.jpg);</string>
     </item>
    </layout>
   </widget>
+  <widget class="QPushButton" name="button_settings">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>10</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-image: url(bg.jpg);</string>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>settings.gif</normaloff>settings.gif</iconset>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
