@@ -126,7 +126,7 @@ class Schedule(QWidget):
             pass
         self.prev_minute = self.session['countdown'].minute
         self.session['current_ratio'] = '{}:{}'.format(*self.get_ratio())
-        self.session['title'] = 'Schedule - {}'.format(self.session['countdown'].strftime('%H:%M:%S'))
+        self.session['title'] = self.session['countdown'].strftime('%H:%M:%S')
         if not self.session['countdown'].hour \
                 and not self.session['countdown'].minute \
                 and not self.session['countdown'].second:
@@ -151,6 +151,8 @@ class Schedule(QWidget):
         self.session['button_pause_continue'] = 'Pause'
         self.session['prev_action'] = self.session['action'].lower()
         self.session['action'] = action
+        self.session['countdown'] = datetime(1970, 1, 1, 0, self.session['timeout'], 0)
+        self.session['progress'] = 0
         self.sound_timer.stop()
         try:
             self.button_pause_continue.clicked.disconnect(self.stop_sound)
