@@ -49,7 +49,7 @@ class Schedule(QWidget):
                 self.session = temp_session
             else:
                 self.session = default_session
-        except FileNotFoundError:
+        except (FileNotFoundError, pickle.UnpicklingError):
             self.session = default_session
 
         if self.session['countdown'].minute != self.session['timeout']:

@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['O:\\MyDocuments\\PyCharmProjects\\Schedule\\schedule.py'],
-             pathex=['O:\\MyDocuments\\PyCharmProjects\\Schedule'],
+a = Analysis(['O:\PycharmProjects\Schedule\schedule.py'],
+             pathex=['O:\PycharmProjects\Schedule\schedule.py'],
              binaries=[],
              datas=[],
              hiddenimports=[],
